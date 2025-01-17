@@ -1,3 +1,0 @@
-C:/Users/james/projects/28fees_project/cmake-build-debug/CMakeFiles/28fees_project.dir
-C:/Users/james/projects/28fees_project/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/james/projects/28fees_project/cmake-build-debug/CMakeFiles/rebuild_cache.dir
