@@ -1,11 +1,15 @@
-// C++ code
-//
+//Copyright (c) 2024 JAMES KUANG ZHONGCHUAN
+//Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+//The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-const int ledPin = 4;
-const int buttonPin = 5;
+const int ledPin = 2;
+const int lightPin = 1;
+const int buttonPin = 4;
 const int buzzerPin = 12;
 const int trigPin = 10;
 const int echoPin = 11;
+const int ldrPin = A0;
 
 long duration;
 int distance;
@@ -16,6 +20,8 @@ bool lightState;
 int lightDelay = 200;
 long currentMillis;
 long delayMillis = currentMillis;
+bool ldrState;
+bool yellowLightState;
 
 bool buzzerState;
 int buzzerDelay = 400;
@@ -26,60 +32,77 @@ void setup()
   pinMode(echoPin, INPUT);
   pinMode(ledPin, OUTPUT);
   pinMode(buzzerPin, OUTPUT);
+  pinMode(lightPin, OUTPUT);
+  pinMode(ldrPin, INPUT);
 }
 
 void loop()
-{  
+{
+
+  if (state == LOW) {
+    lightState = LOW;
+  }
+
   currentMillis = millis();
   buttonState = digitalRead(buttonPin);
   
   if (buttonState == HIGH) {
     state = !state;
   }
-
-  if (!state) {
-    digitalWrite(ledPin, LOW);
-    noTone(buzzerPin);
-  }
   
   // active state
   if (state == HIGH) {
     // ultrasonic sensor code
     digitalWrite(trigPin, LOW);
-    delayMicroseconds(2);
+  	delayMicroseconds(2);
     digitalWrite(trigPin, HIGH);
-    delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  duration = pulseIn(echoPin, HIGH);
-  distance = duration * 0.034 / 2;
-  Serial.print("Distance: ");
-  Serial.println(distance);
+  	delayMicroseconds(10);
+ 	digitalWrite(trigPin, LOW);
+ 	duration = pulseIn(echoPin, HIGH);
+ 	distance = duration * 0.034 / 2;
+ 	Serial.print("Distance: ");
+ 	Serial.println(distance);
     
         // led code
     if (currentMillis - delayMillis >= lightDelay) {
-      lightState = !lightState;
-        digitalWrite(ledPin, lightState);
-      delayMillis = currentMillis;
-    }  
+     	lightState = !lightState;
+      	digitalWrite(ledPin, lightState);
+   		delayMillis = currentMillis;
+  	}  
     Serial.print(distance);
     
     // buzzer code
-    if (distance < 10) {
+    if (distance < 15) {
       tone(buzzerPin, 1000, 1);
-      if (currentMillis - delayMillis >= buzzerDelay) {
-          if (buzzerState == 1) {
-              noTone(buzzerPin);
-              buzzerState = !buzzerState;
-                Serial.print("buzzer off");
-            } 
-            else if (buzzerState == 0) {
-              tone(buzzerPin, 1000);
-              buzzerState = !buzzerState;
-                Serial.print("buzzer on");
-            }
-        delayMillis = currentMillis;   // update for next 200ms delay 
+    	if (currentMillis - delayMillis >= buzzerDelay) {
+        	if (buzzerState == 1) {
+             	noTone(buzzerPin);
+            	buzzerState = !buzzerState;
+              	Serial.print("buzzer off");
+          	} 
+          	else if (buzzerState == 0) {
+          		tone(buzzerPin, 1000);
+            	buzzerState = !buzzerState;
+              	Serial.print("buzzer on");
+          	}
+    		delayMillis = currentMillis;   // update for next 200ms delay 
+  		} 
+    }
+
+    ldrState = analogRead(ldrPin);
+
+    if (ldrState <= 450)
+    {
+      if (yellowLightState == LOW) {
+        yellowLightState = HIGH;
+        digitalWrite(lightPin, yellowLightState);
       } 
     }
+    else {
+        yellowLightState = LOW;
+        digitalWrite(lightPin, yellowLightState);
+    }
   }
-  delay(5); // delay to ensure system can be turned off
+
+  delay(500);
 }
