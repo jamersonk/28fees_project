@@ -24,7 +24,7 @@ bool ldrState;
 bool yellowLightState;
 
 bool buzzerState;
-int buzzerDelay = 400;
+int buzzerDelay = 5000;
 
 void setup()
 {
@@ -41,6 +41,10 @@ void loop()
 
   if (state == LOW) {
     lightState = LOW;
+    yellowLightState = LOW;
+    digitalWrite(ledPin, lightState);
+    digitalWrite(lightPin, yellowLightState);
+    noTone(buzzerPin);
   }
 
   currentMillis = millis();
@@ -72,26 +76,13 @@ void loop()
     Serial.print(distance);
     
     // buzzer code
-    if (distance < 15) {
-      tone(buzzerPin, 1000, 1);
-    	if (currentMillis - delayMillis >= buzzerDelay) {
-        	if (buzzerState == 1) {
-             	noTone(buzzerPin);
-            	buzzerState = !buzzerState;
-              	Serial.print("buzzer off");
-          	} 
-          	else if (buzzerState == 0) {
-          		tone(buzzerPin, 1000);
-            	buzzerState = !buzzerState;
-              	Serial.print("buzzer on");
-          	}
-    		delayMillis = currentMillis;   // update for next 200ms delay 
-  		} 
+    if (distance < 30) {
+      tone(buzzerPin, 4000, 5);
     }
 
     ldrState = analogRead(ldrPin);
 
-    if (ldrState <= 450)
+    if (ldrState <= 350)
     {
       if (yellowLightState == LOW) {
         yellowLightState = HIGH;
@@ -104,5 +95,8 @@ void loop()
     }
   }
 
-  delay(500);
+  delay(1000);
 }
+
+
+
