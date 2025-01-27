@@ -10,7 +10,8 @@ const int buttonPin = 4;
 const int buzzerPin = 12;
 const int trigPin = 10;
 const int echoPin = 11;
-const int ldrPin = A0;
+int ldrPin = A0;
+const int cutoffDistance = 20;
 
 // VARIABLES
 long duration;
@@ -18,15 +19,20 @@ int distance;
 bool buttonState;
 bool state;
 
+// flashing warning light variables
 bool lightState;
 int lightDelay = 200;
 long currentMillis;
 long delayMillis = currentMillis;
-bool ldrState;
+
+// headlight variables
+int ldrState;
 bool yellowLightState;
 
+// buzzer variables
 bool buzzerState;
-int buzzerDelay = 5000;
+int buzzerDelay = 250;
+long buzzerDelayMillis = currentMillis;
 
 // CODE BEGINS
 void setup()
@@ -52,9 +58,11 @@ void loop()
 
   currentMillis = millis();
   buttonState = digitalRead(buttonPin);
+  ldrState = analogRead(ldrPin);
   
   if (buttonState == HIGH) {
     state = !state;
+    delay(500);
   }
   
   // active state
@@ -64,13 +72,13 @@ void loop()
   	delayMicroseconds(2);
     digitalWrite(trigPin, HIGH);
   	delayMicroseconds(10);
- 	digitalWrite(trigPin, LOW);
- 	duration = pulseIn(echoPin, HIGH);
- 	distance = duration * 0.034 / 2;
- 	Serial.print("Distance: ");
- 	Serial.println(distance);
+ 	  digitalWrite(trigPin, LOW);
+ 	  duration = pulseIn(echoPin, HIGH);
+ 	  distance = duration * 0.034 / 2;
+ 	  Serial.print("Distance: ");
+ 	  Serial.println(distance);
     
-        // led code
+    // led code
     if (currentMillis - delayMillis >= lightDelay) {
      	lightState = !lightState;
       	digitalWrite(ledPin, lightState);
@@ -79,14 +87,24 @@ void loop()
     Serial.print(distance);
     
     // buzzer code
-    if (distance < 30) {
-      tone(buzzerPin, 4000, 5);
+    if (distance < cutoffDistance) {
+      if (currentMillis - buzzerDelayMillis >= buzzerDelay) {
+     	  buzzerState = !buzzerState;
+        if (buzzerState == LOW) {
+          noTone(buzzerPin);
+        }
+        else if (buzzerState == HIGH) {
+          tone(buzzerPin, 4000);
+        }
+   		buzzerDelayMillis = currentMillis;
+  	  }  
+    }
+    else if (distance > cutoffDistance) {
+      buzzerState = LOW;
+      noTone(buzzerPin);
     }
 
-    ldrState = analogRead(ldrPin);
-
-    if (ldrState <= 350)
-    {
+    if (ldrState<=350){
       if (yellowLightState == LOW) {
         yellowLightState = HIGH;
         digitalWrite(lightPin, yellowLightState);
@@ -97,8 +115,6 @@ void loop()
         digitalWrite(lightPin, yellowLightState);
     }
   }
-
-  delay(1000);
 }
 
 
